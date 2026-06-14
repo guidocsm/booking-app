@@ -1,6 +1,8 @@
-# Residencial Montelima
+# Bookè
 
-Premium, mobile-first booking app for residents of the Residencial Montelima gated community (Tres Cantos, Madrid). Quiet-luxury design language, Spanish (es-ES) UI.
+Premium, mobile-first booking app for residents of an upscale gated community (Tres Cantos, Madrid). Quiet-luxury design language, Spanish (es-ES) UI.
+
+Code identifiers are written in English; only user-facing copy is in Spanish (es-ES).
 
 This repository currently contains the **foundation** (step 1): fonts, Tailwind theme tokens, Supabase wiring, the mobile-first shell, the bottom tab bar, placeholder routes, and shared constants/helpers. Feature logic is intentionally not built yet.
 

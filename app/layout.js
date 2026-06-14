@@ -1,5 +1,6 @@
 import { Fraunces } from "next/font/google";
 import { GeistSans } from "geist/font/sans";
+import { APP_NAME } from "@/lib/constants";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -10,8 +11,8 @@ const fraunces = Fraunces({
 });
 
 export const metadata = {
-  title: "Residencial Montelima",
-  description: "Reservas de espacios comunes — Residencial Montelima",
+  title: APP_NAME,
+  description: `Reservas de espacios comunes — ${APP_NAME}`,
 };
 
 export default function RootLayout({ children }) {
