@@ -2,23 +2,26 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, CalendarCheck, UserRound } from "lucide-react";
+import { House, CalendarCheck, UserRound, Shield } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-const TABS = [
+const BASE_TABS = [
   { href: "/inicio", label: "Inicio", icon: House },
   { href: "/reservas", label: "Mis reservas", icon: CalendarCheck },
   { href: "/perfil", label: "Mi perfil", icon: UserRound },
 ];
 
-export function BottomTabBar() {
+const ADMIN_TAB = { href: "/admin", label: "Gestión", icon: Shield };
+
+export function BottomTabBar({ isAdmin = false }) {
   const pathname = usePathname();
+  const tabs = isAdmin ? [...BASE_TABS, ADMIN_TAB] : BASE_TABS;
 
   return (
     <nav className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-6">
       <div className="pointer-events-auto flex w-full max-w-md items-stretch justify-between gap-1 rounded-full border border-stone-200 bg-white p-2 shadow-lg">
-        {TABS.map(({ href, label, icon: Icon }) => {
+        {tabs.map(({ href, label, icon: Icon }) => {
           const isActive =
             pathname === href || pathname.startsWith(`${href}/`);
 
@@ -28,7 +31,7 @@ export function BottomTabBar() {
               href={href}
               aria-current={isActive ? "page" : undefined}
               className={cn(
-                "flex flex-1 flex-col items-center justify-center gap-1 rounded-full py-2 transition-colors",
+                "flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-full py-2 transition-colors",
                 isActive
                   ? "text-emerald-900"
                   : "text-stone-400 hover:text-stone-600"
@@ -41,7 +44,8 @@ export function BottomTabBar() {
               />
               <span
                 className={cn(
-                  "text-[11px] leading-none",
+                  "whitespace-nowrap leading-none",
+                  isAdmin ? "text-[10px]" : "text-[11px]",
                   isActive ? "font-medium" : "font-normal"
                 )}
               >
