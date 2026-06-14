@@ -275,37 +275,41 @@ export function SpaceBooking({ space, userId }) {
     : generateBlocks(hours.open, hours.close, space.slotMinutes);
 
   const durationLabel = formatDuration(space.slotMinutes);
+  const isToday = selectedDate === todayISO;
+  const nowMs = Date.now();
 
-  const slots = blocks.map((start) => {
-    const end = addMinutes(start, space.slotMinutes);
-    const startMs = Date.parse(buildMadridTimestamp(selectedDate, start));
-    const matching = bookings.filter(
-      (booking) => Date.parse(booking.start_time) === startMs
-    );
-    const count = matching.length;
-    const mine = matching.some((booking) => booking.user_id === userId);
-    const startMin = toMinutes(start);
-    const endMin = toMinutes(end);
-    const isMaintenance = maintenance.some((block) => {
-      const blockStart = toMinutes(block.start_time);
-      const blockEnd = toMinutes(block.end_time);
-      return startMin < blockEnd && endMin > blockStart;
-    });
+  const slots = blocks
+    .map((start) => {
+      const end = addMinutes(start, space.slotMinutes);
+      const startMs = Date.parse(buildMadridTimestamp(selectedDate, start));
+      const matching = bookings.filter(
+        (booking) => Date.parse(booking.start_time) === startMs
+      );
+      const count = matching.length;
+      const mine = matching.some((booking) => booking.user_id === userId);
+      const startMin = toMinutes(start);
+      const endMin = toMinutes(end);
+      const isMaintenance = maintenance.some((block) => {
+        const blockStart = toMinutes(block.start_time);
+        const blockEnd = toMinutes(block.end_time);
+        return startMin < blockEnd && endMin > blockStart;
+      });
 
-    let status;
-    if (isMaintenance) status = "maintenance";
-    else if (mine) status = "mine";
-    else if (space.capacity <= 1 ? count >= 1 : count >= space.capacity)
-      status = "occupied";
-    else status = "available";
+      let status;
+      if (isMaintenance) status = "maintenance";
+      else if (mine) status = "mine";
+      else if (space.capacity <= 1 ? count >= 1 : count >= space.capacity)
+        status = "occupied";
+      else status = "available";
 
-    const remaining = space.capacity > 1 ? Math.max(space.capacity - count, 0) : 0;
+      const remaining =
+        space.capacity > 1 ? Math.max(space.capacity - count, 0) : 0;
 
-    return { start, end, status, remaining };
-  });
+      return { start, end, status, remaining, startMs };
+    })
+    .filter((slot) => !isToday || slot.startMs > nowMs);
 
   const availableCount = slots.filter((slot) => slot.status === "available").length;
-  const isToday = selectedDate === todayISO;
   const dayLabel = isToday
     ? `Hoy, ${dayNumber(selectedDate)} ${monthShort(selectedDate)}`
     : `${weekdayLong(selectedDate)}, ${dayNumber(selectedDate)} ${monthShort(selectedDate)}`;
@@ -464,6 +468,15 @@ export function SpaceBooking({ space, userId }) {
                 className="h-[5.25rem] animate-pulse rounded-2xl border border-stone-200 bg-stone-50"
               />
             ))}
+          </div>
+        ) : slots.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-stone-300 bg-white px-6 py-14 text-center">
+            <p className="font-serif text-xl font-normal tracking-tight text-stone-900">
+              No quedan horas disponibles hoy
+            </p>
+            <p className="max-w-xs text-sm text-stone-400">
+              Hoy ya no hay más turnos. Prueba con otro día.
+            </p>
           </div>
         ) : (
           <div className="space-y-3">
