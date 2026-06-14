@@ -3,21 +3,38 @@
 import { useRouter } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 
+import { cn } from "@/lib/utils";
+
 export function SpaceHubGrid({ spaces }) {
   const router = useRouter();
 
+  const count = spaces.length;
+  const singleColumn = count === 1;
+  const oddBeyondFirst = count > 1 && count % 2 === 1;
+
   return (
     <div className="overflow-hidden rounded-3xl border border-stone-200 bg-stone-200">
-      <div className="grid grid-cols-2 gap-px">
-        {spaces.map((space) => {
+      <div
+        className={cn(
+          "grid gap-px",
+          singleColumn ? "grid-cols-1" : "grid-cols-2"
+        )}
+      >
+        {spaces.map((space, index) => {
           const initial = (space.name || "").charAt(0).toUpperCase();
+          const isLast = index === count - 1;
+          const fullWidth = singleColumn || (isLast && oddBeyondFirst);
 
           return (
             <button
               key={space.id}
               type="button"
               onClick={() => router.push(`/reservar/${space.id}`)}
-              className="group relative flex aspect-square flex-col justify-between overflow-hidden bg-white p-5 text-left transition-colors hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-800"
+              className={cn(
+                "group relative flex flex-col justify-between overflow-hidden bg-white p-5 text-left transition-colors hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-800",
+                fullWidth ? "h-44" : "aspect-square",
+                isLast && oddBeyondFirst ? "col-span-2" : null
+              )}
             >
               <span
                 aria-hidden="true"
