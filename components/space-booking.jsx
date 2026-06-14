@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import {
-  ChevronLeft,
   ArrowUpRight,
   Check,
   Lock,
@@ -20,6 +18,8 @@ import {
   madridDateParts,
   addDaysISO,
 } from "@/lib/time";
+import { getTypeLabel } from "@/lib/spaceTypes";
+import { BackLink } from "@/components/back-link";
 import { cn } from "@/lib/utils";
 
 const MAINTENANCE_PATTERN =
@@ -84,7 +84,7 @@ function formatDuration(minutes) {
   return `${text} h`;
 }
 
-function SlotCard({ slot, durationLabel, capacity, submitting, busy, onReserve }) {
+function SlotCard({ slot, durationLabel, submitting, busy, onReserve }) {
   const range = `${slot.start} – ${slot.end}`;
 
   if (slot.status === "mine") {
@@ -116,7 +116,7 @@ function SlotCard({ slot, durationLabel, capacity, submitting, busy, onReserve }
           <div className="flex items-center gap-2">
             <Lock className="h-3.5 w-3.5 text-stone-400" strokeWidth={1.8} aria-hidden="true" />
             <span className="text-xs uppercase tracking-[0.18em] text-stone-400">
-              {capacity > 1 ? "Completo" : "Reservada"}
+              Reservada
             </span>
           </div>
           <p className="font-serif text-xl font-normal tracking-tight text-stone-400">
@@ -153,13 +153,6 @@ function SlotCard({ slot, durationLabel, capacity, submitting, busy, onReserve }
     );
   }
 
-  const availableLabel =
-    slot.remaining > 1
-      ? `${slot.remaining} plazas libres`
-      : slot.remaining === 1
-        ? "1 plaza libre"
-        : "Disponible";
-
   return (
     <button
       type="button"
@@ -172,7 +165,7 @@ function SlotCard({ slot, durationLabel, capacity, submitting, busy, onReserve }
         <div className="flex items-center gap-2">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-700" />
           <span className="text-xs uppercase tracking-[0.18em] text-stone-400">
-            {availableLabel}
+            Disponible
           </span>
         </div>
         <p className="font-serif text-xl font-normal tracking-tight text-stone-900">
@@ -285,7 +278,6 @@ export function SpaceBooking({ space, userId }) {
       const matching = bookings.filter(
         (booking) => Date.parse(booking.start_time) === startMs
       );
-      const count = matching.length;
       const mine = matching.some((booking) => booking.user_id === userId);
       const startMin = toMinutes(start);
       const endMin = toMinutes(end);
@@ -298,14 +290,10 @@ export function SpaceBooking({ space, userId }) {
       let status;
       if (isMaintenance) status = "maintenance";
       else if (mine) status = "mine";
-      else if (space.capacity <= 1 ? count >= 1 : count >= space.capacity)
-        status = "occupied";
+      else if (matching.length >= 1) status = "occupied";
       else status = "available";
 
-      const remaining =
-        space.capacity > 1 ? Math.max(space.capacity - count, 0) : 0;
-
-      return { start, end, status, remaining, startMs };
+      return { start, end, status, startMs };
     })
     .filter((slot) => !isToday || slot.startMs > nowMs);
 
@@ -361,13 +349,7 @@ export function SpaceBooking({ space, userId }) {
   return (
     <div className="space-y-8">
       <header className="space-y-4">
-        <Link
-          href="/inicio"
-          aria-label="Volver al inicio"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-600 transition-colors hover:bg-stone-50"
-        >
-          <ChevronLeft className="h-4 w-4" strokeWidth={1.6} aria-hidden="true" />
-        </Link>
+        <BackLink href="/inicio" />
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-[0.18em] text-stone-400">
             Reserva
@@ -375,6 +357,9 @@ export function SpaceBooking({ space, userId }) {
           <h1 className="font-serif text-3xl font-normal tracking-tight text-stone-900">
             {space.name}
           </h1>
+          <p className="text-xs uppercase tracking-[0.18em] text-stone-400">
+            {getTypeLabel(space.type)}
+          </p>
         </div>
       </header>
 
@@ -485,7 +470,6 @@ export function SpaceBooking({ space, userId }) {
                 key={slot.start}
                 slot={slot}
                 durationLabel={durationLabel}
-                capacity={space.capacity}
                 submitting={submittingBlock === slot.start}
                 busy={submittingBlock !== null}
                 onReserve={() => reserve(slot.start)}

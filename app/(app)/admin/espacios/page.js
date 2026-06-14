@@ -3,7 +3,9 @@ import { Plus } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMembership } from "@/lib/auth/getCurrentMembership";
-import { spaceTypeLabel, durationLabel } from "@/lib/spaces";
+import { getTypeLabel } from "@/lib/spaceTypes";
+import { durationLabel } from "@/lib/spaces";
+import { BackLink } from "@/components/back-link";
 
 export default async function AdminSpacesPage() {
   const membership = await getCurrentMembership();
@@ -22,7 +24,7 @@ export default async function AdminSpacesPage() {
 
     const { data } = await supabase
       .from("spaces")
-      .select("id, name, type, capacity, slot_minutes, is_active")
+      .select("id, name, type, slot_minutes, is_active")
       .eq("community_id", membership.communityId)
       .order("name");
     spaces = data ?? [];
@@ -30,7 +32,8 @@ export default async function AdminSpacesPage() {
 
   return (
     <div className="space-y-8">
-      <header className="space-y-3">
+      <header className="space-y-4">
+        <BackLink href="/admin" />
         <p className="text-xs uppercase tracking-[0.18em] text-stone-400">
           Gestión
         </p>
@@ -72,8 +75,8 @@ export default async function AdminSpacesPage() {
                   {space.name}
                 </p>
                 <p className="truncate text-xs text-stone-400">
-                  {spaceTypeLabel(space.type)} · Aforo {space.capacity} ·{" "}
-                  {durationLabel(space.slot_minutes)} por turno
+                  {getTypeLabel(space.type)} · {durationLabel(space.slot_minutes)}{" "}
+                  por turno
                 </p>
               </div>
               <span

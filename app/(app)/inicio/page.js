@@ -61,7 +61,7 @@ export default async function HomePage() {
 
       const { data: communitySpaces } = await supabase
         .from("spaces")
-        .select("id, name, type, capacity")
+        .select("id, name")
         .eq("community_id", membership.community_id)
         .eq("is_active", true)
         .order("name");

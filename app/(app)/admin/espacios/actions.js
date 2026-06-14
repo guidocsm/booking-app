@@ -9,7 +9,6 @@ function buildPayload(values) {
   return {
     name: (values.name ?? "").trim(),
     type: values.type,
-    capacity: Math.max(1, Math.trunc(Number(values.capacity) || 1)),
     slot_minutes: Number(values.slotMinutes) || 90,
     max_advance_days: Math.max(1, Math.trunc(Number(values.maxAdvanceDays) || 7)),
     is_active: Boolean(values.isActive),

@@ -5,6 +5,7 @@ import { CalendarPlus, AlertCircle, Loader2 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { madridTimeRange, madridDayLabel } from "@/lib/time";
+import { getTypeLabel } from "@/lib/spaceTypes";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,21 +42,16 @@ function BookingCard({ booking, variant, cancellable, onCancel }) {
   const isUpcoming = variant === "upcoming";
   const range = madridTimeRange(booking.startTime, booking.endTime);
   const dayLabel = madridDayLabel(booking.startTime);
+  const typeLabel = booking.spaceType
+    ? getTypeLabel(booking.spaceType)
+    : booking.spaceName;
 
   return (
     <div className="flex items-center justify-between gap-4 rounded-2xl border border-stone-200 bg-white p-5">
       <div className="min-w-0 space-y-1.5">
-        <div className="flex items-center gap-2">
-          <span
-            className={cn(
-              "h-1.5 w-1.5 rounded-full",
-              isUpcoming ? "bg-emerald-700" : "bg-stone-400"
-            )}
-          />
-          <span className="text-xs uppercase tracking-[0.18em] text-stone-400">
-            {isUpcoming ? "Confirmada" : "Finalizada"}
-          </span>
-        </div>
+        <p className="truncate text-xs uppercase tracking-[0.18em] text-stone-900">
+          {typeLabel}
+        </p>
         <p className="font-serif text-xl font-normal tracking-tight text-stone-900">
           {range}
         </p>

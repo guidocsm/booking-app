@@ -1,14 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Loader2, AlertCircle, Check, Copy } from "lucide-react";
+import { Loader2, AlertCircle, Check, Copy } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { SPACE_TYPES, SLOT_OPTIONS } from "@/lib/spaces";
+import { BackLink } from "@/components/back-link";
+import { SPACE_TYPES } from "@/lib/spaceTypes";
+import { SLOT_OPTIONS } from "@/lib/spaces";
 import { createSpace, updateSpace } from "@/app/(app)/admin/espacios/actions";
 
 const DAY_ROWS = [
@@ -83,7 +84,6 @@ export function SpaceForm({ spaceId = null, initialSpace = null }) {
 
   const [name, setName] = useState(initialSpace?.name ?? "");
   const [type, setType] = useState(initialSpace?.type ?? SPACE_TYPES[0].value);
-  const [capacity, setCapacity] = useState(String(initialSpace?.capacity ?? 1));
   const [slotMinutes, setSlotMinutes] = useState(
     String(initialSpace?.slotMinutes ?? 90)
   );
@@ -143,10 +143,7 @@ export function SpaceForm({ spaceId = null, initialSpace = null }) {
   );
 
   const valid =
-    name.trim().length > 0 &&
-    Number(capacity) >= 1 &&
-    Number(maxAdvanceDays) >= 1 &&
-    scheduleValid;
+    name.trim().length > 0 && Number(maxAdvanceDays) >= 1 && scheduleValid;
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -166,7 +163,6 @@ export function SpaceForm({ spaceId = null, initialSpace = null }) {
     const values = {
       name,
       type,
-      capacity,
       slotMinutes,
       maxAdvanceDays,
       isActive,
@@ -196,13 +192,7 @@ export function SpaceForm({ spaceId = null, initialSpace = null }) {
   return (
     <div className="space-y-8">
       <header className="space-y-4">
-        <Link
-          href="/admin/espacios"
-          aria-label="Volver a espacios"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-600 transition-colors hover:bg-stone-50"
-        >
-          <ChevronLeft className="h-4 w-4" strokeWidth={1.6} aria-hidden="true" />
-        </Link>
+        <BackLink href="/admin/espacios" />
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-[0.18em] text-stone-400">
             Gestión
@@ -249,26 +239,6 @@ export function SpaceForm({ spaceId = null, initialSpace = null }) {
                 </option>
               ))}
             </select>
-          </div>
-
-          <div className="space-y-1.5">
-            <label htmlFor="capacity" className={LABEL_CLASS}>
-              Aforo
-            </label>
-            <Input
-              id="capacity"
-              type="number"
-              min={1}
-              step={1}
-              value={capacity}
-              onChange={(event) => {
-                clearMessages();
-                setCapacity(event.target.value);
-              }}
-            />
-            <p className="text-xs text-stone-400">
-              1 = uso exclusivo por turno; mayor = varias reservas por turno.
-            </p>
           </div>
 
           <div className="space-y-1.5">

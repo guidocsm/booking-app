@@ -12,7 +12,7 @@ export default async function EditSpacePage({ params }) {
   const { data: space } = await supabase
     .from("spaces")
     .select(
-      "id, name, type, capacity, slot_minutes, max_advance_days, is_active, weekly_hours"
+      "id, name, type, slot_minutes, max_advance_days, is_active, weekly_hours"
     )
     .eq("id", spaceId)
     .eq("community_id", membership?.communityId ?? "")
@@ -25,7 +25,6 @@ export default async function EditSpacePage({ params }) {
   const initialSpace = {
     name: space.name ?? "",
     type: space.type ?? "padel",
-    capacity: space.capacity ?? 1,
     slotMinutes: space.slot_minutes ?? 90,
     maxAdvanceDays: space.max_advance_days ?? 7,
     isActive: space.is_active ?? true,

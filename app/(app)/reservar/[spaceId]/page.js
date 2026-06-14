@@ -37,7 +37,7 @@ export default async function BookingSpacePage({ params }) {
   const { data: space } = await supabase
     .from("spaces")
     .select(
-      "id, name, type, capacity, community_id, max_advance_days, is_active, weekly_hours, slot_minutes"
+      "id, name, type, community_id, max_advance_days, is_active, weekly_hours, slot_minutes"
     )
     .eq("id", spaceId)
     .maybeSingle();
@@ -50,7 +50,6 @@ export default async function BookingSpacePage({ params }) {
     id: space.id,
     name: space.name,
     type: space.type,
-    capacity: space.capacity ?? 1,
     communityId: space.community_id,
     maxAdvanceDays: space.max_advance_days ?? 7,
     weeklyHours: space.weekly_hours ?? {},

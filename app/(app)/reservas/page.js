@@ -13,7 +13,7 @@ export default async function BookingsPage() {
   if (user) {
     const { data } = await supabase
       .from("bookings")
-      .select("id, space_id, start_time, end_time, status, spaces(name)")
+      .select("id, space_id, start_time, end_time, status, spaces(name, type)")
       .eq("user_id", user.id)
       .eq("status", "active")
       .order("start_time", { ascending: true });
@@ -25,6 +25,7 @@ export default async function BookingsPage() {
       endTime: booking.end_time,
       status: booking.status,
       spaceName: booking.spaces?.name ?? "Espacio",
+      spaceType: booking.spaces?.type ?? null,
     }));
   }
 
