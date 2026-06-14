@@ -38,6 +38,53 @@ export async function createBlock(values) {
   return { error: null };
 }
 
+export async function updateBlock(blockId, values, previousSpaceId = null) {
+  const membership = await getCurrentMembership();
+  if (!membership || membership.role !== "admin" || !membership.communityId) {
+    return { error: "No tienes permisos para esta acción." };
+  }
+
+  const supabase = await createClient();
+
+  const { data: space } = await supabase
+    .from("spaces")
+    .select("id, community_id")
+    .eq("id", values.spaceId)
+    .maybeSingle();
+
+  if (!space || space.community_id !== membership.communityId) {
+    return { error: "Espacio no válido." };
+  }
+
+  const { data, error } = await supabase
+    .from("spaces_blocks")
+    .update({
+      space_id: values.spaceId,
+      block_date: values.blockDate,
+      start_time: values.startTime,
+      end_time: values.endTime,
+      reason: (values.reason ?? "").trim(),
+    })
+    .eq("id", blockId)
+    .select("id");
+
+  if (error) return { error: error.message };
+
+  if (!data || data.length === 0) {
+    return {
+      error:
+        "No se pudo actualizar el bloqueo. Puede que no tengas permisos para editarlo.",
+    };
+  }
+
+  revalidatePath("/admin/mantenimiento");
+  revalidatePath(`/reservar/${values.spaceId}`);
+  if (previousSpaceId && previousSpaceId !== values.spaceId) {
+    revalidatePath(`/reservar/${previousSpaceId}`);
+  }
+  return { error: null };
+}
+
 export async function deleteBlock(blockId, spaceId) {
   const membership = await getCurrentMembership();
   if (!membership || membership.role !== "admin" || !membership.communityId) {

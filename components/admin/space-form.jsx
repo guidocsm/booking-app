@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { BackLink } from "@/components/back-link";
-import { SPACE_TYPES } from "@/lib/spaceTypes";
 import { SLOT_OPTIONS } from "@/lib/spaces";
 import { createSpace, updateSpace } from "@/app/(app)/admin/espacios/actions";
 
@@ -78,12 +77,14 @@ function buildInitialSchedule(weeklyHours) {
   });
 }
 
-export function SpaceForm({ spaceId = null, initialSpace = null }) {
+export function SpaceForm({ spaceId = null, initialSpace = null, typeOptions = [] }) {
   const router = useRouter();
   const isEdit = Boolean(spaceId);
 
   const [name, setName] = useState(initialSpace?.name ?? "");
-  const [type, setType] = useState(initialSpace?.type ?? SPACE_TYPES[0].value);
+  const [type, setType] = useState(
+    initialSpace?.type ?? typeOptions[0]?.key ?? ""
+  );
   const [slotMinutes, setSlotMinutes] = useState(
     String(initialSpace?.slotMinutes ?? 90)
   );
@@ -233,8 +234,8 @@ export function SpaceForm({ spaceId = null, initialSpace = null }) {
               }}
               className={SELECT_CLASS}
             >
-              {SPACE_TYPES.map((option) => (
-                <option key={option.value} value={option.value}>
+              {typeOptions.map((option) => (
+                <option key={option.key} value={option.key}>
                   {option.label}
                 </option>
               ))}

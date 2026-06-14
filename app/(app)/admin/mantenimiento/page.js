@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMembership } from "@/lib/auth/getCurrentMembership";
+import { getLabelMap, getLabel } from "@/lib/lookups";
 import { madridDateParts } from "@/lib/time";
 import { BackLink } from "@/components/back-link";
 import { MaintenanceList } from "@/components/admin/maintenance-list";
@@ -11,6 +12,11 @@ export default async function AdminMaintenancePage() {
   const membership = await getCurrentMembership();
   const supabase = await createClient();
   const todayISO = madridDateParts(new Date()).dateISO;
+
+  const [typeMap, reasonMap] = await Promise.all([
+    getLabelMap("space_type", membership?.communityId),
+    getLabelMap("maintenance_reason", membership?.communityId),
+  ]);
 
   let blocks = [];
 
@@ -31,9 +37,9 @@ export default async function AdminMaintenancePage() {
       blockDate: block.block_date,
       startTime: block.start_time,
       endTime: block.end_time,
-      reason: block.reason,
       spaceName: block.spaces?.name ?? "Espacio",
-      spaceType: block.spaces?.type ?? null,
+      spaceTypeLabel: getLabel(typeMap, block.spaces?.type),
+      reasonLabel: getLabel(reasonMap, block.reason),
     }));
   }
 

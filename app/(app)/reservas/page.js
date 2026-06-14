@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentMembership } from "@/lib/auth/getCurrentMembership";
+import { getLabelMap, getLabel } from "@/lib/lookups";
 import { BookingsList } from "@/components/bookings-list";
 
 export default async function BookingsPage() {
@@ -7,6 +9,9 @@ export default async function BookingsPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  const membership = await getCurrentMembership();
+  const typeMap = await getLabelMap("space_type", membership?.communityId);
 
   let bookings = [];
 
@@ -25,7 +30,9 @@ export default async function BookingsPage() {
       endTime: booking.end_time,
       status: booking.status,
       spaceName: booking.spaces?.name ?? "Espacio",
-      spaceType: booking.spaces?.type ?? null,
+      spaceTypeLabel: booking.spaces?.type
+        ? getLabel(typeMap, booking.spaces.type)
+        : null,
     }));
   }
 

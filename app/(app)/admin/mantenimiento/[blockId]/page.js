@@ -6,9 +6,23 @@ import { getLookups, getLabelMap, getLabel } from "@/lib/lookups";
 import { BackLink } from "@/components/back-link";
 import { MaintenanceForm } from "@/components/admin/maintenance-form";
 
-export default async function NewMaintenancePage() {
+export default async function EditMaintenancePage({ params }) {
+  const { blockId } = params;
   const membership = await getCurrentMembership();
   const supabase = await createClient();
+
+  const { data: block } = await supabase
+    .from("spaces_blocks")
+    .select(
+      "id, space_id, block_date, start_time, end_time, reason, spaces!inner(community_id)"
+    )
+    .eq("id", blockId)
+    .eq("spaces.community_id", membership?.communityId ?? "")
+    .maybeSingle();
+
+  if (!block) {
+    redirect("/admin/mantenimiento");
+  }
 
   const [{ data }, typeMap, reasonOptions] = await Promise.all([
     supabase
@@ -26,9 +40,13 @@ export default async function NewMaintenancePage() {
     typeLabel: getLabel(typeMap, space.type),
   }));
 
-  if (spaces.length === 0) {
-    redirect("/admin/mantenimiento");
-  }
+  const initialBlock = {
+    spaceId: block.space_id,
+    blockDate: block.block_date,
+    startTime: block.start_time,
+    endTime: block.end_time,
+    reason: block.reason,
+  };
 
   return (
     <div className="space-y-8">
@@ -39,12 +57,17 @@ export default async function NewMaintenancePage() {
             Gestión
           </p>
           <h1 className="font-serif text-3xl font-normal tracking-tight text-stone-900">
-            Nuevo bloqueo
+            Editar bloqueo
           </h1>
         </div>
       </header>
 
-      <MaintenanceForm spaces={spaces} reasonOptions={reasonOptions} />
+      <MaintenanceForm
+        spaces={spaces}
+        reasonOptions={reasonOptions}
+        blockId={block.id}
+        initialBlock={initialBlock}
+      />
     </div>
   );
 }

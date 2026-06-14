@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Wrench, AlertCircle, Loader2 } from "lucide-react";
 
-import { getTypeLabel } from "@/lib/spaceTypes";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -17,31 +17,27 @@ import {
 import { deleteBlock } from "@/app/(app)/admin/mantenimiento/actions";
 
 function formatDate(dateISO) {
-  const date = new Date(`${dateISO}T12:00:00Z`);
-  const day = Number(dateISO.split("-")[2]);
-  const month = new Intl.DateTimeFormat("es-ES", {
-    month: "short",
-    timeZone: "UTC",
-  })
-    .format(date)
-    .replace(/\.$/, "");
-  return `${day} ${month}`;
+  const [year, month, day] = dateISO.split("-");
+  return `${day}/${month}/${year}`;
 }
 
 function MaintenanceCard({ block, onDelete }) {
   const range = `${block.startTime.slice(0, 5)} – ${block.endTime.slice(0, 5)}`;
 
   return (
-    <div className="flex items-center justify-between gap-4 rounded-2xl border border-stone-200 bg-white p-5">
-      <div className="min-w-0 space-y-1.5">
+    <div className="flex items-center justify-between gap-4 rounded-2xl border border-stone-200 bg-white p-5 transition-colors hover:border-stone-300">
+      <Link
+        href={`/admin/mantenimiento/${block.id}`}
+        className="min-w-0 flex-1 space-y-1.5"
+      >
         <p className="truncate text-xs uppercase tracking-[0.18em] text-stone-900">
-          {getTypeLabel(block.spaceType)} · {block.spaceName}
+          {block.spaceTypeLabel} · {block.spaceName}
         </p>
         <p className="font-serif text-xl font-normal tracking-tight text-stone-900">
           {formatDate(block.blockDate)} · {range}
         </p>
-        <p className="truncate text-xs text-stone-400">{block.reason}</p>
-      </div>
+        <p className="truncate text-xs text-stone-400">{block.reasonLabel}</p>
+      </Link>
       <button
         type="button"
         onClick={onDelete}

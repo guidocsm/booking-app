@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
+import { getLabelMap, getLabel } from "@/lib/lookups";
 import { SpaceBooking } from "@/components/space-booking";
 
 function UnavailableState() {
@@ -46,15 +47,26 @@ export default async function BookingSpacePage({ params }) {
     return <UnavailableState />;
   }
 
+  const [typeMap, reasonLabels] = await Promise.all([
+    getLabelMap("space_type", space.community_id),
+    getLabelMap("maintenance_reason", space.community_id),
+  ]);
+
   const mappedSpace = {
     id: space.id,
     name: space.name,
-    type: space.type,
+    typeLabel: getLabel(typeMap, space.type),
     communityId: space.community_id,
     maxAdvanceDays: space.max_advance_days ?? 7,
     weeklyHours: space.weekly_hours ?? {},
     slotMinutes: space.slot_minutes ?? 90,
   };
 
-  return <SpaceBooking space={mappedSpace} userId={user.id} />;
+  return (
+    <SpaceBooking
+      space={mappedSpace}
+      userId={user.id}
+      reasonLabels={reasonLabels}
+    />
+  );
 }

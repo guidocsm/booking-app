@@ -18,7 +18,6 @@ import {
   madridDateParts,
   addDaysISO,
 } from "@/lib/time";
-import { getTypeLabel } from "@/lib/spaceTypes";
 import { BackLink } from "@/components/back-link";
 import { cn } from "@/lib/utils";
 
@@ -138,7 +137,9 @@ function SlotCard({ slot, durationLabel, submitting, busy, onReserve }) {
           <div className="flex items-center gap-2">
             <Wrench className="h-3.5 w-3.5 text-stone-400" strokeWidth={1.8} aria-hidden="true" />
             <span className="text-xs uppercase tracking-[0.18em] text-stone-400">
-              No disponible
+              {slot.reasonLabel
+                ? `No disponible · ${slot.reasonLabel}`
+                : "No disponible"}
             </span>
           </div>
           <p className="font-serif text-xl font-normal tracking-tight text-stone-400">
@@ -194,7 +195,7 @@ function SlotCard({ slot, durationLabel, submitting, busy, onReserve }) {
   );
 }
 
-export function SpaceBooking({ space, userId }) {
+export function SpaceBooking({ space, userId, reasonLabels = {} }) {
   const supabase = useMemo(() => createClient(), []);
   const todayISO = useMemo(() => madridDateParts(new Date()).dateISO, []);
 
@@ -281,19 +282,23 @@ export function SpaceBooking({ space, userId }) {
       const mine = matching.some((booking) => booking.user_id === userId);
       const startMin = toMinutes(start);
       const endMin = toMinutes(end);
-      const isMaintenance = maintenance.some((block) => {
+      const overlappingBlock = maintenance.find((block) => {
         const blockStart = toMinutes(block.start_time);
         const blockEnd = toMinutes(block.end_time);
         return startMin < blockEnd && endMin > blockStart;
       });
 
       let status;
-      if (isMaintenance) status = "maintenance";
+      if (overlappingBlock) status = "maintenance";
       else if (mine) status = "mine";
       else if (matching.length >= 1) status = "occupied";
       else status = "available";
 
-      return { start, end, status, startMs };
+      const reasonLabel = overlappingBlock
+        ? reasonLabels[overlappingBlock.reason] ?? null
+        : null;
+
+      return { start, end, status, startMs, reasonLabel };
     })
     .filter((slot) => !isToday || slot.startMs > nowMs);
 
@@ -358,7 +363,7 @@ export function SpaceBooking({ space, userId }) {
             {space.name}
           </h1>
           <p className="text-xs uppercase tracking-[0.18em] text-stone-400">
-            {getTypeLabel(space.type)}
+            {space.typeLabel}
           </p>
         </div>
       </header>

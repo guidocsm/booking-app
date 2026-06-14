@@ -3,7 +3,7 @@ import { Plus } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMembership } from "@/lib/auth/getCurrentMembership";
-import { getTypeLabel } from "@/lib/spaceTypes";
+import { getLabelMap, getLabel } from "@/lib/lookups";
 import { durationLabel } from "@/lib/spaces";
 import { BackLink } from "@/components/back-link";
 
@@ -13,6 +13,7 @@ export default async function AdminSpacesPage() {
 
   let communityName = null;
   let spaces = [];
+  const typeMap = await getLabelMap("space_type", membership?.communityId);
 
   if (membership?.communityId) {
     const { data: community } = await supabase
@@ -75,8 +76,8 @@ export default async function AdminSpacesPage() {
                   {space.name}
                 </p>
                 <p className="truncate text-xs text-stone-400">
-                  {getTypeLabel(space.type)} · {durationLabel(space.slot_minutes)}{" "}
-                  por turno
+                  {getLabel(typeMap, space.type)} ·{" "}
+                  {durationLabel(space.slot_minutes)} por turno
                 </p>
               </div>
               <span
