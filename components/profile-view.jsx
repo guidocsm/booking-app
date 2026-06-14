@@ -14,9 +14,9 @@ import {
 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
-import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { updateProfileAction } from "@/app/(app)/perfil/actions";
 
 function Field({ id, label, icon: Icon, helper, children }) {
   return (
@@ -114,19 +114,16 @@ export function ProfileView({ userId, email, accessCode, profile }) {
 
     const trimmedPhone = phone.trim();
 
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
-        unit_info: unitInfo.trim(),
-        phone: trimmedPhone === "" ? null : trimmedPhone,
-      })
-      .eq("id", userId);
+    const result = await updateProfileAction({
+      firstName,
+      lastName,
+      unitInfo,
+      phone,
+    });
 
     setSaving(false);
 
-    if (error) {
+    if (result?.error) {
       setSaveError("No hemos podido guardar los cambios. Inténtalo de nuevo.");
       return;
     }
@@ -143,6 +140,7 @@ export function ProfileView({ userId, email, accessCode, profile }) {
     setPhone(nextSaved.phone);
     setSaved(nextSaved);
     setSaveSuccess("Cambios guardados.");
+    router.refresh();
   }
 
   async function handlePasswordChange(event) {
@@ -242,7 +240,7 @@ export function ProfileView({ userId, email, accessCode, profile }) {
             />
           </Field>
 
-          <Field id="phone" label="Teléfono">
+          <Field id="phone" label="Teléfono (opcional)">
             <Input
               id="phone"
               type="tel"
